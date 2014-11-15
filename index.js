@@ -44,8 +44,6 @@ var middleware = function (options) {
       });
     }
 
-    // mprinc
-    // It has to be fast, avoid wrapping in Array
     var methods = !opts.method || Array.isArray(opts.method) ?
                   opts.method : [opts.method];
 
