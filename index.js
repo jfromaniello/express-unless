@@ -2,7 +2,6 @@ var URL = require('url');
 
 var middleware = function (options) {
   var parent = this;
-  //console.log("[unless] options = %s, this = %s", JSON.stringify(options), this);
 
   var opts = typeof options === 'function' ? {custom: options} : options;
 
@@ -18,7 +17,6 @@ var middleware = function (options) {
     var paths = !opts.path || Array.isArray(opts.path) ?
                 opts.path : [opts.path];
 
-    //console.log("[unless] paths: %s", JSON.stringify(paths));
     if (paths) {
       skip = skip || paths.some(function (path) {
     	if(path instanceof Object && !(path instanceof RegExp)){
@@ -27,7 +25,6 @@ var middleware = function (options) {
     	}else{
         	var p = path;
     	}
-        //console.log("[unless] path: %s, req.method: %s, m: %s, Array.isArray(m): %s, !!~m.indexOf(req.method): %s", p, req.method, m, Array.isArray(m), m && !!~m.indexOf(req.method));
         return (
           (typeof p === 'string' && p === url.pathname)
           || (p instanceof RegExp && !!p.exec(url.pathname)))
@@ -57,8 +54,6 @@ var middleware = function (options) {
     }
 
     if (skip) {
-    	//console.log("[express-jwt:unless] skipping for: req.method = %s, req.url = %s", 
-    	//	req.method, req.url);
       return next();
     }
 
