@@ -26,7 +26,7 @@ module.exports = function (middlewareOptions) {
 
   };
 
-  mymid.unless = require('unless-express');
+  mymid.unless = require('express-unless');
 
   return mymid;
 };
