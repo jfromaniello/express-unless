@@ -1,11 +1,11 @@
 var URL = require('url');
 
-module.exports = function (options) {
+var middleware = function (options) {
   var parent = this;
 
   var opts = typeof options === 'function' ? {custom: options} : options;
 
-  return function (req, res, next) {
+  var unless = function (req, res, next) {
     var url = URL.parse(req.originalUrl || req.url || '', true);
 
     var skip = false;
@@ -18,9 +18,20 @@ module.exports = function (options) {
                 opts.path : [opts.path];
 
     if (paths) {
-      skip = skip || paths.some(function (p) {
-        return (typeof p === 'string' && p === url.pathname) ||
-               (p instanceof RegExp && !!p.exec(url.pathname));
+      skip = skip || paths.some(function (path) {
+    	if(path instanceof Object && !(path instanceof RegExp)){
+    		var p = path.p;
+    		var m = path.m;
+    	}else{
+        	var p = path;
+    	}
+        return (
+          (typeof p === 'string' && p === url.pathname)
+          || (p instanceof RegExp && !!p.exec(url.pathname)))
+        && (!m
+          || (typeof m === 'string' && m === req.method)
+          || (Array.isArray(m) && !!~m.indexOf(req.method))
+          );
       });
     }
 
@@ -46,4 +57,9 @@ module.exports = function (options) {
 
     parent(req, res, next);
   };
+  
+  unless.unless = middleware; // fluid interface, chainable
+  return unless;
 };
+
+module.exports = middleware;

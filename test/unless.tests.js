@@ -19,17 +19,14 @@ describe('express-unless', function () {
       var req = {
         originalUrl: '/test?das=123'
       };
-
       mid(req, {}, noop);
-
       assert.notOk(req.called);
+
 
       req = {
         originalUrl: '/fobo?test=123'
       };
-
       mid(req, {}, noop);
-
       assert.notOk(req.called);
     });
 
@@ -37,12 +34,141 @@ describe('express-unless', function () {
       var req = {
         originalUrl: '/foobar/test=123'
       };
-
       mid(req, {}, noop);
-
       assert.ok(req.called);
     });
   });
+
+  describe('with single PATH (obj)', function () {
+	    var mid = testMiddleware.unless({
+	      path: {p: '/nada'}
+	    });
+	    it('should not call the middleware when one of the path match', function () {
+	      var req = {
+	        originalUrl: '/nada'
+	      };
+	      mid(req, {}, noop);
+	      assert.notOk(req.called);
+
+	      var req = {
+	        originalUrl: '/nada?das=123',
+	        method: 'OPTIONS'
+	      };
+	      mid(req, {}, noop);
+	      assert.notOk(req.called);
+	    });
+
+	    it('should call the middleware when the path doesnt match', function () {
+	      var req = {
+	  	        originalUrl: '/foobar'
+	  	      };
+	  	      mid(req, {}, noop);
+	  	      assert.ok(req.called);
+
+	  	      var req = {
+	        originalUrl: '/foobar/test=123'
+	      };
+	      mid(req, {}, noop);
+	      assert.ok(req.called);
+	    });
+	  });
+
+  describe('with single PATH (obj with method)', function () {
+	    var mid = testMiddleware.unless({
+	      path: {p: '/nada', m: ['OPTIONS', 'GET']}
+	    });
+	    it('should not call the middleware when one of the path match', function () {
+	      var req = {
+	        originalUrl: '/nada',
+            method: 'OPTIONS'
+	      };
+	      mid(req, {}, noop);
+	      assert.notOk(req.called);
+
+	      var req = {
+	        originalUrl: '/nada?das=123',
+            method: 'GET'
+	      };
+	      mid(req, {}, noop);
+	      assert.notOk(req.called);
+	    });
+
+	    it('should call the middleware when the path doesnt match', function () {
+	      var req = {
+  	        originalUrl: '/foobar'
+  	      };
+  	      mid(req, {}, noop);
+  	      assert.ok(req.called);
+
+  	      var req = {
+	        originalUrl: '/nada/test=123',
+            method: 'PUT'
+	      };
+	      mid(req, {}, noop);
+	      assert.ok(req.called);
+	    });
+	  });
+
+  describe('with array of PATHs (obj with method)', function () {
+	    var mid = testMiddleware.unless({
+	      path: [
+ 	        '/milica',
+	        {p: '/nada', m: 'OPTIONS'},
+	        {p: '/mile', m: ['DELETE', 'PUT']}
+	      ]
+	    });
+	    it('should not call the middleware when one of the path match', function () {
+	      var req = {
+	        originalUrl: '/milica',
+            method: 'OPTIONS'
+	      };
+	      mid(req, {}, noop);
+	      assert.notOk(req.called);
+
+	      var req = {
+	        originalUrl: '/nada?das=123',
+            method: 'OPTIONS'
+	      };
+	      mid(req, {}, noop);
+	      assert.notOk(req.called);
+
+	      var req = {
+  	        originalUrl: '/mile?das=123',
+  	        method: 'DELETE'
+	      };
+	      mid(req, {}, noop);
+	      assert.notOk(req.called);
+
+	      var req = {
+	        originalUrl: '/mile?das=123',
+	        method: 'PUT'
+  	      };
+  	      mid(req, {}, noop);
+  	      assert.notOk(req.called);
+	    });
+
+	    it('should call the middleware when the path doesnt match', function () {
+	      var req = {
+	        originalUrl: '/foobar'
+	      };
+	      mid(req, {}, noop);
+	      assert.ok(req.called);
+
+	      var req = {
+	        originalUrl: '/nada/test=123',
+            method: 'PUT'
+	      };
+	      mid(req, {}, noop);
+	      assert.ok(req.called);
+
+	      var req = {
+  	        originalUrl: '/mile/test=123',
+  	        method: 'GET'
+  	      };
+  	      mid(req, {}, noop);
+  	      assert.ok(req.called);
+	    });
+	  });
 
   describe('with PATH (regex) exception', function () {
     var mid = testMiddleware.unless({
@@ -60,6 +186,45 @@ describe('express-unless', function () {
     });
 
   });
+
+  describe('with PATH (obj) (regex) exception', function () {
+	    var mid = testMiddleware.unless({
+	      path: ['/test', '/fobo', {p: /da+/}, {p: /ag$/ig, m: 'GET'}]
+	    });
+
+	    it('should not call the middleware when the regex match', function () {
+
+	      req = {
+  	        originalUrl: '/nadaa?test=123',
+  	        method: 'GET'
+  	      };
+  	      mid(req, {}, noop);
+  	      assert.notOk(req.called);
+
+  	      req = {
+	        originalUrl: '/foboag?test=123',
+            method: 'GET'
+	      };
+	      mid(req, {}, noop);
+	      assert.notOk(req.called);
+	    });
+
+	    it('should call the middleware when the path doesnt match', function () {
+	      req = {
+  	        originalUrl: '/foboaga?test=123',
+  	        method: 'GET'
+  	      };
+  	      mid(req, {}, noop);
+  	      assert.ok(req.called);
+
+  	      req = {
+	        originalUrl: '/foboag?test=123',
+          method: 'PUT'
+	      };
+	      mid(req, {}, noop);
+	      assert.ok(req.called);
+	    });
+	  });
 
   describe('with EXT exception', function () {
     var mid = testMiddleware.unless({
@@ -140,5 +305,62 @@ describe('express-unless', function () {
       assert.ok(req.called);
     });
   });
+
+  describe('with CHAINED UNLESS', function () {
+	    var mid = testMiddleware
+	    	.unless({path: ['/test', '/fobo']})
+	    	.unless({path: {p: '/nada', m: ['PUT', 'GET']}})
+	    	.unless({method: ['OPTIONS']});
+
+	    it('should not call the middleware when one of the path match', function () {
+	      var req = {
+	        originalUrl: '/test?das=123'
+	      };
+	      mid(req, {}, noop);
+	      assert.notOk(req.called);
+
+	      req = {
+	        originalUrl: '/fobo?test=123'
+	      };
+	      mid(req, {}, noop);
+	      assert.notOk(req.called);
+
+	      req = {
+	        originalUrl: '/nada?test=123',
+	        method: 'GET'
+	      };
+	      mid(req, {}, noop);
+	      assert.notOk(req.called);
+
+	      req = {
+	        originalUrl: '/anything',
+	        method: 'OPTIONS'
+	      };
+	      mid(req, {}, noop);
+	      assert.notOk(req.called);
+	    });
+
+	    it('should call the middleware when the path doesnt match', function () {
+	      var req = {
+	        originalUrl: '/testing'
+	      };
+	      mid(req, {}, noop);
+	      assert.ok(req.called);
+
+	      var req = {
+  	        originalUrl: '/nada',
+	        method: 'POST'
+  	      };
+  	      mid(req, {}, noop);
+  	      assert.ok(req.called);
+
+	      var req = {
+  	        originalUrl: '/wrong',
+	        method: 'POST'
+  	      };
+  	      mid(req, {}, noop);
+  	      assert.ok(req.called);
+	    });
+	  });
 
 });
