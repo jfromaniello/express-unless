@@ -38,6 +38,7 @@ module.exports = function (middlewareOptions) {
 -  `path` it could be an string, a regexp or an array of any of those. If the request path match, the middleware will not run.
 -  `ext` it could be an string or an array of strings. If the request path ends with one of these extensions the middleware will not run.
 -  `custom` it must be a function that accepts `req` and returns `true` / `false`. If the function returns true for the given request, ithe middleware will not run.
+-  `useOriginalUrl` it should be `true` or `false`, default is `true`. if false, `path` will match against `req.url` instead of `req.originalUrl`. Please refer to [Express API](http://expressjs.com/4x/api.html#request) for the difference between `req.url` and `req.originalUrl`.
 
 
 ## Examples

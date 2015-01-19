@@ -61,6 +61,46 @@ describe('express-unless', function () {
 
   });
 
+  describe('with PATH (useOriginalUrl) exception', function () {
+    var mid = testMiddleware.unless({
+      path: ['/test', '/fobo'],
+      useOriginalUrl: false
+    });
+
+    it('should not call the middleware when one of the path match '+
+        'req.url instead of req.originalUrl', function () {
+      var req = {
+        originalUrl: '/orig/test?das=123',
+        url: '/test?das=123'
+      };
+
+      mid(req, {}, noop);
+
+      assert.notOk(req.called);
+
+      req = {
+        originalUrl: '/orig/fobo?test=123',
+        url: '/fobo?test=123'
+      };
+
+      mid(req, {}, noop);
+
+      assert.notOk(req.called);
+    });
+
+    it('should call the middleware when the path doesnt match '+
+        'req.url even if path matches req.originalUrl', function () {
+      var req = {
+        originalUrl: '/test/test=123',
+        url: '/foobar/test=123'
+      };
+
+      mid(req, {}, noop);
+
+      assert.ok(req.called);
+    });
+  });
+
   describe('with EXT exception', function () {
     var mid = testMiddleware.unless({
       ext: ['jpg', 'html', 'txt']
