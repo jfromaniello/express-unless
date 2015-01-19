@@ -1,14 +1,14 @@
 {
   "name": "express-unless",
   "description": "Conditionally add a middleware to express with some common patterns.",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "repository": {
     "url": "git://github.com/jfromaniello/express-unless.git"
   },
   "author": {
-    "name":   "José F. Romaniello",
-    "email":  "jfromaniello@gmail.com",
-    "url":    "http://joseoncode.com"
+    "name": "José F. Romaniello",
+    "email": "jfromaniello@gmail.com",
+    "url": "http://joseoncode.com"
   },
   "main": "index.js",
   "scripts": {
@@ -17,6 +17,6 @@
   "dependencies": {},
   "devDependencies": {
     "mocha": "~1.11.0",
-    "chai":  "~1.7.0"
+    "chai": "~1.7.0"
   }
 }
