@@ -12,7 +12,7 @@ module.exports = function (options) {
     var skip = false;
 
     if (opts.custom) {
-      skip = skip || opts.custom(req);
+      skip = skip || opts.custom(req, res, next);
     }
 
     var paths = !opts.path || Array.isArray(opts.path) ?
