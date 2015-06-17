@@ -20,8 +20,10 @@ module.exports = function (options) {
 
     if (paths) {
       skip = skip || paths.some(function (p) {
-        return (typeof p === 'string' && p === url.pathname) ||
-               (p instanceof RegExp && !!p.exec(url.pathname));
+        var ret = (typeof p === 'string' && p === url.pathname) || (p instanceof RegExp && !!p.exec(url.pathname));
+        if (p instanceof RegExp)
+          p.lastIndex = 0;
+        return ret;
       });
     }
 
