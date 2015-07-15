@@ -44,9 +44,9 @@ describe('express-unless', function () {
     });
   });
 
-  describe('with PATH (regex) exception', function () {
+  describe.only('with PATH (regex) exception', function () {
     var mid = testMiddleware.unless({
-      path: ['/test', '/fobo', /ag$/ig]
+      path: ['/test', /ag$/ig]
     });
 
     it('should not call the middleware when the regex match', function () {
@@ -54,9 +54,15 @@ describe('express-unless', function () {
         originalUrl: '/foboag?test=123'
       };
 
+      req2 = {
+        originalUrl: '/foboag?test=456'
+      };
+
       mid(req, {}, noop);
+      mid(req2, {}, noop);
 
       assert.notOk(req.called);
+      assert.notOk(req2.called);
     });
 
   });

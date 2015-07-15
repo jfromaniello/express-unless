@@ -21,8 +21,9 @@ module.exports = function (options) {
     if (paths) {
       skip = skip || paths.some(function (p) {
         var ret = (typeof p === 'string' && p === url.pathname) || (p instanceof RegExp && !!p.exec(url.pathname));
-        if (p instanceof RegExp)
+        if (p instanceof RegExp) {
           p.lastIndex = 0;
+        }
         return ret;
       });
     }
