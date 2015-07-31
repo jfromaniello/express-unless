@@ -15,19 +15,18 @@ describe('express-unless', function () {
       path: [
         {
           url: '/test',
-          methods: ['POST']
+          methods: ['POST', 'GET']
         }
       ]
     });
 
-    it('should not call the middleware when one of the path match', function () {
+    it('should not call the middleware when path and method match', function () {
       var req = {
         originalUrl: '/test?das=123',
         method: 'POST'
       };
 
       mid(req, {}, noop);
-
       assert.notOk(req.called);
 
       req = {
@@ -36,7 +35,14 @@ describe('express-unless', function () {
       };
 
       mid(req, {}, noop);
+      assert.ok(req.called);
 
+      req = {
+        originalUrl: '/test?test=123',
+        method: 'GET'
+      };
+
+      mid(req, {}, noop);
       assert.notOk(req.called);
     });
   });
