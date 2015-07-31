@@ -55,7 +55,7 @@ function isUrlMatch(p, url) {
   }
 
   if (p && p.url) {
-    ret = isMatch(p.url, url)
+    ret = isUrlMatch(p.url, url)
   }
   return ret;
 }
