@@ -1,4 +1,4 @@
-var unless = require('../index');
+var unless = require('..');
 var assert = require('chai').assert;
 var noop = function(){};
 
@@ -9,6 +9,37 @@ function testMiddleware (req, res, next) {
 testMiddleware.unless = unless;
 
 describe('express-unless', function () {
+
+  describe('with PATH(with method) exception', function () {
+    var mid = testMiddleware.unless({
+      path: [
+        {
+          url: '/test',
+          methods: ['POST']
+        }
+      ]
+    });
+
+    it('should not call the middleware when one of the path match', function () {
+      var req = {
+        originalUrl: '/test?das=123',
+        method: 'POST'
+      };
+
+      mid(req, {}, noop);
+
+      assert.notOk(req.called);
+
+      req = {
+        originalUrl: '/test?test=123',
+        method: 'PUT'
+      };
+
+      mid(req, {}, noop);
+
+      assert.notOk(req.called);
+    });
+  });
 
   describe('with PATH exception', function () {
     var mid = testMiddleware.unless({
