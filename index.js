@@ -7,7 +7,7 @@ module.exports = function (options) {
   opts.useOriginalUrl = (typeof opts.useOriginalUrl === 'undefined') ? true : opts.useOriginalUrl;
 
   return function (req, res, next) {
-    var url = URL.parse((opts.useOriginalUrl ? req.originalUrl : req.url) || '', true);
+    var url = URL.parse((opts.useOriginalUrl ? req.originalUrl : req.url) || req.url || '', true);
 
     var skip = false;
 
