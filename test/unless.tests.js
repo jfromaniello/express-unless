@@ -44,7 +44,7 @@ describe('express-unless', function () {
     });
   });
 
-  describe.only('with PATH (regex) exception', function () {
+  describe('with PATH (regex) exception', function () {
     var mid = testMiddleware.unless({
       path: ['/test', /ag$/ig]
     });
@@ -179,6 +179,32 @@ describe('express-unless', function () {
     it('should call the middleware when the custom rule doesnt match', function () {
       var req = {
         baba: false
+      };
+
+      mid(req, {}, noop);
+
+      assert.ok(req.called);
+    });
+  });
+
+  describe('without originalUrl', function () {
+    var mid = testMiddleware.unless({
+      path: ['/test']
+    });
+
+    it('should not call the middleware when one of the path match', function () {
+      var req = {
+        url: '/test?das=123'
+      };
+
+      mid(req, {}, noop);
+
+      assert.notOk(req.called);
+    });
+
+    it('should call the middleware when the path doesnt match', function () {
+      var req = {
+        url: '/foobar/test=123'
       };
 
       mid(req, {}, noop);
