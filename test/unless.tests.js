@@ -16,7 +16,12 @@ describe('express-unless', function () {
         {
           url: '/test',
           methods: ['POST', 'GET']
-        }
+        },
+        {
+          url: '/bar',
+          methods: ['PUT']
+        },
+        '/foo'
       ]
     });
 
@@ -29,6 +34,32 @@ describe('express-unless', function () {
       mid(req, {}, noop);
       assert.notOk(req.called);
 
+
+      req = {
+        originalUrl: '/test?test=123',
+        method: 'GET'
+      };
+
+      mid(req, {}, noop);
+      assert.notOk(req.called);
+
+      req = {
+        originalUrl: '/bar?test=123',
+        method: 'PUT'
+      };
+
+      mid(req, {}, noop);
+      assert.notOk(req.called);
+
+      req = {
+        originalUrl: '/foo',
+        method: 'PUT'
+      };
+
+      mid(req, {}, noop);
+      assert.notOk(req.called);
+    });
+    it('should call the middleware when path or method mismatch', function () {
       req = {
         originalUrl: '/test?test=123',
         method: 'PUT'
@@ -38,12 +69,12 @@ describe('express-unless', function () {
       assert.ok(req.called);
 
       req = {
-        originalUrl: '/test?test=123',
-        method: 'GET'
+        originalUrl: '/unless?test=123',
+        method: 'PUT'
       };
 
       mid(req, {}, noop);
-      assert.notOk(req.called);
+      assert.ok(req.called);
     });
   });
 
