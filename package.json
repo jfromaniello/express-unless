@@ -1,7 +1,7 @@
 {
   "name": "express-unless",
   "description": "Conditionally add a middleware to express with some common patterns.",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "repository": {
     "url": "git://github.com/jfromaniello/express-unless.git"
   },
