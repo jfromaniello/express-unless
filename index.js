@@ -20,15 +20,11 @@ module.exports = function (options) {
 
     if (paths) {
       skip = skip || paths.some(function (p) {
-        var ret = (typeof p === 'string' && p === url.pathname) || (p instanceof RegExp && !!p.exec(url.pathname));
-        if (p instanceof RegExp) {
-          p.lastIndex = 0;
-        }
-        return ret;
+        return isUrlMatch(p, url.pathname) && isMethodMatch(p.methods, req.method);
       });
     }
 
-    var exts = !opts.ext || Array.isArray(opts.ext) ?
+    var exts = (!opts.ext || Array.isArray(opts.ext)) ?
                opts.ext : [opts.ext];
 
     if (exts) {
@@ -37,7 +33,7 @@ module.exports = function (options) {
       });
     }
 
-    var methods = !opts.method || Array.isArray(opts.method) ?
+    var methods = (!opts.method || Array.isArray(opts.method)) ?
                   opts.method : [opts.method];
 
     if (methods) {
@@ -51,3 +47,25 @@ module.exports = function (options) {
     parent(req, res, next);
   };
 };
+
+function isUrlMatch(p, url) {
+  var ret = (typeof p === 'string' && p === url) || (p instanceof RegExp && !!p.exec(url));
+  if (p instanceof RegExp) {
+    p.lastIndex = 0;
+  }
+
+  if (p && p.url) {
+    ret = isUrlMatch(p.url, url)
+  }
+  return ret;
+}
+
+function isMethodMatch(methods, m) {
+  if (!methods) {
+    return true;
+  }
+
+  methods = Array.isArray(methods) ? methods : [methods];
+
+  return !!~methods.indexOf(m);
+}

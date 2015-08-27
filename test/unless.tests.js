@@ -1,4 +1,4 @@
-var unless = require('../index');
+var unless = require('..');
 var assert = require('chai').assert;
 var noop = function(){};
 
@@ -9,6 +9,74 @@ function testMiddleware (req, res, next) {
 testMiddleware.unless = unless;
 
 describe('express-unless', function () {
+
+  describe('with PATH(with method) exception', function () {
+    var mid = testMiddleware.unless({
+      path: [
+        {
+          url: '/test',
+          methods: ['POST', 'GET']
+        },
+        {
+          url: '/bar',
+          methods: ['PUT']
+        },
+        '/foo'
+      ]
+    });
+
+    it('should not call the middleware when path and method match', function () {
+      var req = {
+        originalUrl: '/test?das=123',
+        method: 'POST'
+      };
+
+      mid(req, {}, noop);
+      assert.notOk(req.called);
+
+
+      req = {
+        originalUrl: '/test?test=123',
+        method: 'GET'
+      };
+
+      mid(req, {}, noop);
+      assert.notOk(req.called);
+
+      req = {
+        originalUrl: '/bar?test=123',
+        method: 'PUT'
+      };
+
+      mid(req, {}, noop);
+      assert.notOk(req.called);
+
+      req = {
+        originalUrl: '/foo',
+        method: 'PUT'
+      };
+
+      mid(req, {}, noop);
+      assert.notOk(req.called);
+    });
+    it('should call the middleware when path or method mismatch', function () {
+      req = {
+        originalUrl: '/test?test=123',
+        method: 'PUT'
+      };
+
+      mid(req, {}, noop);
+      assert.ok(req.called);
+
+      req = {
+        originalUrl: '/unless?test=123',
+        method: 'PUT'
+      };
+
+      mid(req, {}, noop);
+      assert.ok(req.called);
+    });
+  });
 
   describe('with PATH exception', function () {
     var mid = testMiddleware.unless({
