@@ -15,12 +15,12 @@ module.exports = function (options) {
       skip = skip || opts.custom(req);
     }
 
-    var paths = !opts.path || Array.isArray(opts.path) ?
-                opts.path : [opts.path];
+    var paths = oneOrMany(opts.path);
 
     if (paths) {
       skip = skip || paths.some(function (p) {
-        return isUrlMatch(p, url.pathname) && isMethodMatch(p.methods, req.method);
+        var methods = p.methods || oneOrMany(p.method);
+        return isUrlMatch(p, url.pathname) && isMethodMatch(methods, req.method);
       });
     }
 
@@ -33,8 +33,7 @@ module.exports = function (options) {
       });
     }
 
-    var methods = (!opts.method || Array.isArray(opts.method)) ?
-                  opts.method : [opts.method];
+    var methods = oneOrMany(opts.method);
 
     if (methods) {
       skip = skip || !!~methods.indexOf(req.method);
@@ -47,6 +46,11 @@ module.exports = function (options) {
     parent(req, res, next);
   };
 };
+
+function oneOrMany(elementOrArray) {
+  return !elementOrArray || Array.isArray(elementOrArray) ?
+    elementOrArray : [elementOrArray];
+}
 
 function isUrlMatch(p, url) {
   var ret = (typeof p === 'string' && p === url) || (p instanceof RegExp && !!p.exec(url));
@@ -65,7 +69,7 @@ function isMethodMatch(methods, m) {
     return true;
   }
 
-  methods = Array.isArray(methods) ? methods : [methods];
+  methods = oneOrMany(methods);
 
   return !!~methods.indexOf(m);
 }
