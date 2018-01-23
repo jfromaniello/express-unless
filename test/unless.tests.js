@@ -289,4 +289,41 @@ describe('express-unless', function () {
     });
   });
 
+  describe('chaining', function () {
+    var mid = testMiddleware
+                .unless({ path: '/test' })
+                .unless({ method: 'GET' });
+
+    it('should not call the middleware when first unless match', function () {
+      var req = {
+        url: '/test'
+      };
+
+      mid(req, {}, noop);
+
+      assert.notOk(req.called);
+    });
+
+    it('should not call the middleware when second unless match', function () {
+      var req = {
+        url: '/safsa',
+        method: 'GET'
+      };
+
+      mid(req, {}, noop);
+
+      assert.notOk(req.called);
+    });
+
+    it('should call the middleware when none of the conditions are met', function () {
+      var req = {
+        url: '/foobar/test=123'
+      };
+
+      mid(req, {}, noop);
+
+      assert.ok(req.called);
+    });
+  });
+
 });

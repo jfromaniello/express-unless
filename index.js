@@ -1,12 +1,15 @@
 var URL = require('url');
 
-module.exports = function (options) {
-  var parent = this;
+function unless(middleware, options) {
+  if (typeof options === 'undefined') {
+    options = middleware;
+    middleware = this;
+  }
 
   var opts = typeof options === 'function' ? {custom: options} : options;
   opts.useOriginalUrl = (typeof opts.useOriginalUrl === 'undefined') ? true : opts.useOriginalUrl;
 
-  return function (req, res, next) {
+  const result = function (req, res, next) {
     var url = URL.parse((opts.useOriginalUrl ? req.originalUrl : req.url) || req.url || '', true);
 
     var skip = false;
@@ -36,16 +39,20 @@ module.exports = function (options) {
     var methods = oneOrMany(opts.method);
 
     if (methods) {
-      skip = skip || !!~methods.indexOf(req.method);
+      skip = skip || methods.indexOf(req.method) > -1;
     }
 
     if (skip) {
       return next();
     }
 
-    parent(req, res, next);
+    middleware(req, res, next);
   };
-};
+
+  result.unless = unless;
+
+  return result;
+}
 
 function oneOrMany(elementOrArray) {
   return !elementOrArray || Array.isArray(elementOrArray) ?
@@ -59,7 +66,7 @@ function isUrlMatch(p, url) {
   }
 
   if (p && p.url) {
-    ret = isUrlMatch(p.url, url)
+    ret = isUrlMatch(p.url, url);
   }
   return ret;
 }
@@ -71,5 +78,7 @@ function isMethodMatch(methods, m) {
 
   methods = oneOrMany(methods);
 
-  return !!~methods.indexOf(m);
+  return methods.indexOf(m) > -1;
 }
+
+module.exports = unless;
