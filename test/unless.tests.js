@@ -19,7 +19,7 @@ describe('express-unless', function () {
         },
         {
           url: '/bar',
-          methods: ['PUT']
+          method: 'PUT'
         },
         '/foo'
       ]
@@ -63,6 +63,14 @@ describe('express-unless', function () {
       req = {
         originalUrl: '/test?test=123',
         method: 'PUT'
+      };
+
+      mid(req, {}, noop);
+      assert.ok(req.called);
+
+      req = {
+        originalUrl: '/bar?test=123',
+        method: 'GET'
       };
 
       mid(req, {}, noop);
