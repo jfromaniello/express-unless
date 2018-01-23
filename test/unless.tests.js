@@ -10,7 +10,7 @@ testMiddleware.unless = unless;
 
 describe('express-unless', function () {
 
-  describe('with PATH(with method) exception', function () {
+  describe('with PATH and method exception', function () {
     var mid = testMiddleware.unless({
       path: [
         {
@@ -60,7 +60,7 @@ describe('express-unless', function () {
       assert.notOk(req.called);
     });
     it('should call the middleware when path or method mismatch', function () {
-      req = {
+      var req = {
         originalUrl: '/test?test=123',
         method: 'PUT'
       };
@@ -126,11 +126,11 @@ describe('express-unless', function () {
     });
 
     it('should not call the middleware when the regex match', function () {
-      req = {
+      var req = {
         originalUrl: '/foboag?test=123'
       };
 
-      req2 = {
+      var req2 = {
         originalUrl: '/foboag?test=456'
       };
 
