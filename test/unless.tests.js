@@ -238,8 +238,10 @@ describe('express-unless', function () {
   });
 
   describe('with custom exception', function () {
-    var mid = testMiddleware.unless(function (req) {
-      return req.baba;
+    var mid = testMiddleware.unless({
+      custom: function (req) {
+        return req.baba;
+      }
     });
 
     it('should not call the middleware when the custom rule match', function () {
@@ -253,6 +255,34 @@ describe('express-unless', function () {
     });
 
     it('should call the middleware when the custom rule doesnt match', function () {
+      var req = {
+        baba: false
+      };
+
+      mid(req, {}, noop);
+
+      assert.ok(req.called);
+    });
+  });
+
+  describe('with async custom exception', function () {
+    var mid = testMiddleware.unless({
+      custom: async function (req) {
+        return req.baba;
+      }
+    });
+
+    it('should not call the middleware when the async custom rule match', function () {
+      var req = {
+        baba: true
+      };
+
+      mid(req, {}, noop);
+
+      assert.notOk(req.called);
+    });
+
+    it('should call the middleware when the async custom rule doesnt match', function () {
       var req = {
         baba: false
       };

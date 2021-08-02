@@ -9,13 +9,13 @@ function unless(middleware, options) {
   var opts = typeof options === 'function' ? {custom: options} : options;
   opts.useOriginalUrl = (typeof opts.useOriginalUrl === 'undefined') ? true : opts.useOriginalUrl;
 
-  const result = function (req, res, next) {
+  const result = async function (req, res, next) {
     var url = URL.parse((opts.useOriginalUrl ? req.originalUrl : req.url) || req.url || '', true);
 
     var skip = false;
 
     if (opts.custom) {
-      skip = skip || opts.custom(req);
+      skip = skip || await opts.custom(req);
     }
 
     var paths = oneOrMany(opts.path);
