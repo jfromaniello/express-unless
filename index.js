@@ -15,7 +15,7 @@ function unless(middleware, options) {
     var skip = false;
 
     if (opts.custom) {
-      skip = skip || await opts.custom(req);
+      skip = skip || (await opts.custom(req));
     }
 
     var paths = oneOrMany(opts.path);

@@ -4,6 +4,7 @@ var noop = function(){};
 
 function testMiddleware (req, res, next) {
   req.called = true;
+  next();
 }
 
 testMiddleware.unless = unless;
@@ -254,14 +255,15 @@ describe('express-unless', function () {
       assert.notOk(req.called);
     });
 
-    it('should call the middleware when the custom rule doesnt match', function () {
+    it('should call the middleware when the custom rule doesnt match', function (done) {
       var req = {
         baba: false
       };
 
-      mid(req, {}, noop);
-
-      assert.ok(req.called);
+      mid(req, {}, () => {
+        assert.ok(req.called);
+        done();
+      });
     });
   });
 
@@ -272,24 +274,28 @@ describe('express-unless', function () {
       }
     });
 
-    it('should not call the middleware when the async custom rule match', function () {
+    it('should not call the middleware when the async custom rule match', function (done) {
       var req = {
         baba: true
       };
 
-      mid(req, {}, noop);
-
-      assert.notOk(req.called);
+      mid(req, {}, () => {
+        assert.notOk(req.called);
+        done();
+      });
     });
 
-    it('should call the middleware when the async custom rule doesnt match', function () {
+    it('should call the middleware when the async custom rule doesnt match', function (done) {
       var req = {
         baba: false
       };
 
-      mid(req, {}, noop);
+      mid(req, {}, () => {
+        assert.ok(req.called);
+        done();
+      });
 
-      assert.ok(req.called);
+
     });
   });
 
