@@ -2,7 +2,7 @@ import * as express from 'express';
 import * as URL from 'url';
 
 
-type Path = string | RegExp | { url: string, method?: string, methods?: string | string[] };
+type Path = string | RegExp | { url: string | RegExp, method?: string, methods?: string | string[] };
 
 type Params = {
   method?: string | string[],
