@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { unless } from '../src/index';
 import { assert } from 'chai';
 // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -61,6 +62,7 @@ describe('express-unless', function () {
       mid(req, {} as any, noop);
       assert.notOk(req.called);
     });
+
     it('should call the middleware when path or method mismatch', function () {
       let req: any = {
         originalUrl: '/test?test=123',

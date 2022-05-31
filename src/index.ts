@@ -1,7 +1,7 @@
 import * as express from 'express';
 import URL = require('url');
 
-type Path = string | RegExp | { url: string, method: string } | { url: string, methods: string[] };
+type Path = string | RegExp | { url: string, method?: string, methods?: string | string[] };
 
 type Params = {
   method?: string | string[],
@@ -26,26 +26,29 @@ export function unless(options: Params) {
       skip = skip || (await opts.custom(req));
     }
 
-    const paths = oneOrMany(opts.path);
+    const paths = toArray(opts.path);
 
     if (paths) {
       skip = skip || paths.some(function (p) {
-        const methods = p.methods || oneOrMany(p.method);
-        return isUrlMatch(p, url.pathname) && isMethodMatch(methods, req.method);
+        if (typeof p === 'string' || p instanceof RegExp) {
+          return isUrlMatch(p, url.pathname);
+        } else {
+          return isUrlMatch(p, url.pathname) && isMethodMatch(p.method || p.methods, req.method);
+        }
       });
     }
 
-    const exts = oneOrMany(opts.ext);
 
-    if (exts) {
+    if (typeof opts.ext !== 'undefined') {
+      const exts = toArray(opts.ext);
       skip = skip || exts.some(function (ext) {
         return url.pathname.substr(ext.length * -1) === ext;
       });
     }
 
-    const methods = oneOrMany(opts.method);
 
-    if (methods) {
+    if (typeof opts.method !== 'undefined') {
+      const methods = toArray(opts.method);
       skip = skip || methods.indexOf(req.method) > -1;
     }
 
@@ -61,29 +64,29 @@ export function unless(options: Params) {
   return result;
 }
 
-function oneOrMany(elementOrArray) {
-  return !elementOrArray || Array.isArray(elementOrArray) ?
-    elementOrArray : [elementOrArray];
+function toArray<T>(elementOrArray: T | T[]): T[] {
+  return Array.isArray(elementOrArray) ? elementOrArray : [elementOrArray];
 }
 
-function isUrlMatch(p, url) {
-  let ret = (typeof p === 'string' && p === url) || (p instanceof RegExp && !!p.exec(url));
+function isUrlMatch(p: string | RegExp | { url: string | RegExp }, url: string) {
+  if (typeof p === 'string') {
+    return p === url;
+  }
+
   if (p instanceof RegExp) {
-    p.lastIndex = 0;
+    return url.match(p) !== null;
   }
 
-  if (p && p.url) {
-    ret = isUrlMatch(p.url, url);
+  if (typeof p === 'object' && p.url) {
+    return isUrlMatch(p.url, url);
   }
-  return ret;
+
+  return false;
 }
 
-function isMethodMatch(methods, m) {
-  if (!methods) {
+function isMethodMatch(methods: undefined | string | string[], m: string): boolean {
+  if (typeof methods === 'undefined') {
     return true;
   }
-
-  methods = oneOrMany(methods);
-
-  return methods.indexOf(m) > -1;
+  return toArray(methods).includes(m);
 }
