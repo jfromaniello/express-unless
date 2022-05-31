@@ -1,5 +1,6 @@
 import * as express from 'express';
-import URL = require('url');
+import * as URL from 'url';
+
 
 type Path = string | RegExp | { url: string, method?: string, methods?: string | string[] };
 

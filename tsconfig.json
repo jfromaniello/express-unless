@@ -2,8 +2,10 @@
   "compilerOptions": {
     "outDir": "./dist",
     "allowJs": true,
-    "target": "es5",
-    "declaration": true
+    "target": "es6",
+    "module": "CommonJS",
+    "declaration": true,
+    "moduleResolution": "node"
   },
   "include": [
     "./src/*"
