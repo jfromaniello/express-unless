@@ -24,6 +24,10 @@ describe('express-unless', function () {
           url: '/bar',
           method: 'PUT'
         },
+        {
+          url: /^\/regex/,
+          method: 'OPTIONS'
+        },
         '/foo'
       ]
     });
@@ -55,6 +59,14 @@ describe('express-unless', function () {
       assert.notOk(req.called);
 
       req = {
+        originalUrl: '/regex',
+        method: 'OPTIONS'
+      };
+
+      mid(req, {} as any, noop);
+      assert.notOk(req.called);
+
+      req = {
         originalUrl: '/foo',
         method: 'PUT'
       };
@@ -75,6 +87,14 @@ describe('express-unless', function () {
       req = {
         originalUrl: '/bar?test=123',
         method: 'GET'
+      };
+
+      mid(req, {} as any, noop);
+      assert.ok(req.called);
+
+      req = {
+        originalUrl: '/regex',
+        method: 'DELETE'
       };
 
       mid(req, {} as any, noop);
