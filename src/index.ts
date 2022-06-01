@@ -2,9 +2,9 @@ import * as express from 'express';
 import * as URL from 'url';
 
 
-type Path = string | RegExp | { url: string | RegExp, method?: string, methods?: string | string[] };
+export type Path = string | RegExp | { url: string | RegExp, method?: string, methods?: string | string[] };
 
-type Params = {
+export type Params = {
   method?: string | string[],
   path?: Path | Path[],
   ext?: string | string[],
