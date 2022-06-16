@@ -4,18 +4,23 @@ import * as URL from 'url';
 
 export type Path = string | RegExp | { url: string | RegExp, method?: string, methods?: string | string[] };
 
+export type RequestChecker = (req: express.Request) => boolean;
+
 export type Params = {
   method?: string | string[],
   path?: Path | Path[],
   ext?: string | string[],
-  useOriginalUrl?: boolean
-} | ((req: express.Request) => boolean);
+  useOriginalUrl?: boolean,
+  custom?: RequestChecker
+} | RequestChecker;
 
 export function unless(options: Params) {
   // eslint-disable-next-line @typescript-eslint/no-this-alias
   const middleware = this;
+  const opts: Params = typeof options === 'function' ?
+    { custom: options } :
+    options;
 
-  const opts = { ...options, ...(typeof options === 'function' ? { custom: options } : {}) };
   opts.useOriginalUrl = (typeof opts.useOriginalUrl === 'undefined') ? true : opts.useOriginalUrl;
 
   const result = async function (req: express.Request, res: express.Response, next: express.NextFunction) {
@@ -43,7 +48,7 @@ export function unless(options: Params) {
     if (typeof opts.ext !== 'undefined') {
       const exts = toArray(opts.ext);
       skip = skip || exts.some(function (ext) {
-        return url.pathname.substr(ext.length * -1) === ext;
+        return url.pathname.slice(ext.length * -1) === ext;
       });
     }
 
