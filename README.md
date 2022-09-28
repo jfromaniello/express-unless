@@ -20,10 +20,12 @@ app.use(static.unless({ method: "OPTIONS" }));
 If you are authoring a middleware you can support unless as follow:
 
 ```javascript
+var { unless } = require("express-unless");
+
 module.exports = function (middlewareOptions) {
   var mymid = function (req, res, next) {};
 
-  mymid.unless = require("express-unless");
+  mymid.unless = unless;
 
   return mymid;
 };
