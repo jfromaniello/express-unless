@@ -29,34 +29,22 @@ export function unless(unlessOptions: Params | RequestChecker): UnlessRequestHan
   async function applyMiddlewareOrSkip(
     req: express.Request, res: express.Response, next: express.NextFunction
   ): Promise<void> {
-    let skip = false;
+    let skip = option.custom && option.custom(req);
     const url = URL.parse((option.useOriginalUrl ? req.originalUrl : req.url) || req.url || '', true);
     const paths = toArray(option?.path);
 
-    if (option.custom) {
-      skip = skip || option.custom(req);
-    }
-
     if (paths) {
-      skip = skip || paths.some((path) => {
-        if (typeof path === 'string' || path instanceof RegExp) {
-          return isUrlMatch(path, url.pathname);
-        } else {
-          return isUrlMatch(path, url.pathname) && isMethodMatch(path.method || path.methods, req.method);
-        }
-      });
+      skip = skip || paths.some((path) => typeof path === 'string' || path instanceof RegExp ?
+        isUrlMatch(path, url.pathname)
+        : isUrlMatch(path, url.pathname) && isMethodMatch(path.method || path.methods, req.method));
     }
 
     if (typeof option.ext !== 'undefined') {
-      const exts = toArray(option.ext);
-      skip = skip || exts.some(function (ext) {
-        return url.pathname.slice(ext.length * -1) === ext;
-      });
+      skip = skip || toArray(option.ext).some((ext) => url.pathname.slice(ext.length * -1) === ext);
     }
 
     if (typeof option.method !== 'undefined') {
-      const methods = toArray(option.method);
-      skip = skip || methods.indexOf(req.method) > -1;
+      skip = skip || toArray(option.method).indexOf(req.method) > -1;
     }
 
     return skip ? next() : middleware(req, res, next)
