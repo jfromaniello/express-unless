@@ -1,90 +1,71 @@
-import * as express from 'express';
+import express from 'express';
 import * as URL from 'url';
 
-
 export type Path = string | RegExp | { url: string | RegExp, method?: string, methods?: string | string[] };
-
 export type RequestChecker = (req: express.Request) => boolean;
 
-export type Params = {
-  method?: string | string[],
-  path?: Path | Path[],
-  ext?: string | string[],
-  useOriginalUrl?: boolean,
-  custom?: RequestChecker
-} | RequestChecker;
+export interface UnlessRequestHandler extends express.RequestHandler {
+  unless?: (unlessOptions: Params | RequestChecker) => UnlessRequestHandler;
+}
 
-export function unless(options: Params) {
+export interface Params {
+  method?: string | string[];
+  path?: Path | Path[];
+  ext?: string | string[];
+  useOriginalUrl?: boolean;
+  custom?: RequestChecker;
+}
+
+export function unless(unlessOptions: Params | RequestChecker): UnlessRequestHandler {
   // eslint-disable-next-line @typescript-eslint/no-this-alias
-  const middleware = this;
-  const opts: Params = typeof options === 'function' ?
-    { custom: options } :
-    options;
+  const middleware: express.RequestHandler = this;
+  const option: Params = typeof unlessOptions === 'function' ? { custom: unlessOptions } : unlessOptions;
+  option.useOriginalUrl = (typeof option.useOriginalUrl === 'undefined') ? true : option.useOriginalUrl;
 
-  opts.useOriginalUrl = (typeof opts.useOriginalUrl === 'undefined') ? true : opts.useOriginalUrl;
+  const result: UnlessRequestHandler = applyMiddlewareOrSkip;
+  result.unless = unless;
+  return result;
 
-  const result = async function (req: express.Request, res: express.Response, next: express.NextFunction) {
-    const url = URL.parse((opts.useOriginalUrl ? req.originalUrl : req.url) || req.url || '', true);
-
-    let skip = false;
-
-    if (opts.custom) {
-      skip = skip || (await opts.custom(req));
-    }
-
-    const paths = toArray(opts.path);
+  async function applyMiddlewareOrSkip(
+    req: express.Request, res: express.Response, next: express.NextFunction
+  ): Promise<void> {
+    let skip = option.custom && option.custom(req);
+    const url = URL.parse((option.useOriginalUrl ? req.originalUrl : req.url) || req.url || '', true);
+    const paths = toArray(option?.path);
 
     if (paths) {
-      skip = skip || paths.some(function (p) {
-        if (typeof p === 'string' || p instanceof RegExp) {
-          return isUrlMatch(p, url.pathname);
-        } else {
-          return isUrlMatch(p, url.pathname) && isMethodMatch(p.method || p.methods, req.method);
-        }
-      });
+      skip = skip || paths.some((path) => typeof path === 'string' || path instanceof RegExp ?
+        isUrlMatch(path, url.pathname)
+        : isUrlMatch(path, url.pathname) && isMethodMatch(path.method || path.methods, req.method));
     }
 
-
-    if (typeof opts.ext !== 'undefined') {
-      const exts = toArray(opts.ext);
-      skip = skip || exts.some(function (ext) {
-        return url.pathname.slice(ext.length * -1) === ext;
-      });
+    if (typeof option.ext !== 'undefined') {
+      skip = skip || toArray(option.ext).some((ext) => url.pathname.slice(ext.length * -1) === ext);
     }
 
-
-    if (typeof opts.method !== 'undefined') {
-      const methods = toArray(opts.method);
-      skip = skip || methods.indexOf(req.method) > -1;
+    if (typeof option.method !== 'undefined') {
+      skip = skip || toArray(option.method).indexOf(req.method) > -1;
     }
 
-    if (skip) {
-      return next();
-    }
-
-    middleware(req, res, next);
-  };
-
-  result.unless = unless;
-
-  return result;
+    return skip ? next() : middleware(req, res, next)
+  }
 }
 
 function toArray<T>(elementOrArray: T | T[]): T[] {
   return Array.isArray(elementOrArray) ? elementOrArray : [elementOrArray];
 }
 
-function isUrlMatch(p: string | RegExp | { url: string | RegExp }, url: string) {
-  if (typeof p === 'string') {
-    return p === url;
+function isUrlMatch(path: string | RegExp | { url: string | RegExp }, url: string): boolean {
+  if (typeof path === 'string') {
+    return path === url;
   }
 
-  if (p instanceof RegExp) {
-    return url.match(p) !== null;
+  if (path instanceof RegExp) {
+    return url.match(path) !== null;
   }
 
-  if (typeof p === 'object' && p.url) {
-    return isUrlMatch(p.url, url);
+  if (typeof path === 'object' && path.url) {
+    return isUrlMatch(path.url, url);
   }
 
   return false;
