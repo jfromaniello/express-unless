@@ -74,17 +74,17 @@ function toArray<T>(elementOrArray: T | T[]): T[] {
   return Array.isArray(elementOrArray) ? elementOrArray : [elementOrArray];
 }
 
-function isUrlMatch(p: string | RegExp | { url: string | RegExp }, url: string) {
-  if (typeof p === 'string') {
-    return p === url;
+function isUrlMatch(path: string | RegExp | { url: string | RegExp }, url: string): boolean {
+  if (typeof path === 'string') {
+    return path === url;
   }
 
-  if (p instanceof RegExp) {
-    return url.match(p) !== null;
+  if (path instanceof RegExp) {
+    return url.match(path) !== null;
   }
 
-  if (typeof p === 'object' && p.url) {
-    return isUrlMatch(p.url, url);
+  if (typeof path === 'object' && path.url) {
+    return isUrlMatch(path.url, url);
   }
 
   return false;
