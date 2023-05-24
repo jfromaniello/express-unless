@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { unless } from '../src/index';
+import { unless } from '../src';
 import { assert } from 'chai';
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 const noop = function () { };
