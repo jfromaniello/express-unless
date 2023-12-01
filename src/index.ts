@@ -62,7 +62,11 @@ export function unless(options: Params) {
       return next();
     }
 
-    middleware(req, res, next);
+    try {
+      return middleware(req, res, next);
+    } catch (err) {
+      return next(err);
+    }
   };
 
   result.unless = unless;
