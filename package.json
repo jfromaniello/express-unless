@@ -17,7 +17,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "rm -rf dist && tsc",
+    "build": "tsc",
     "prepare": "npm run build",
     "test": "mocha -R spec --require ts-node/register test/**",
     "lint": "eslint --fix --ext .ts ./src"
